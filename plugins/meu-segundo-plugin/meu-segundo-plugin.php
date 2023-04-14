@@ -28,6 +28,7 @@ class SegundoPlugin
         }
 
         add_action('welcome_panel', array($this, 'welcomePanel'));
+        add_action('admin_enqueue_scripts', array($this, 'addCss'));
     }
 
     public function welcomePanel()
@@ -46,6 +47,12 @@ class SegundoPlugin
                 </div>
             </div>
         <?php
+    }
+
+    public function addCss()
+    {
+        wp_register_style('meu-segundo-plugin', plugin_dir_url(__FILE__).'css/meu-segundo-plugin.css');
+        wp_enqueue_style('meu-segundo-plugin');
     }
 
 }
