@@ -12,3 +12,20 @@ function meuPluginAlteraRodape()
 }
 
 add_action('wp_footer', 'meuPluginAlteraRodape');
+
+add_action('init', 'myUserCheck');
+
+function myUserCheck()
+{
+    if (is_user_logged_in()) {
+        echo "<script> alert(1) </script>";
+    }
+}
+
+add_filter('the_title', 'myFilteredTitle', 10, 2);
+
+function myFilteredTitle($value)
+{
+    $value = '[***' . $value . '***]';
+    return $value;
+}
