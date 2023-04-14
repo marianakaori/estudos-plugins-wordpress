@@ -6,30 +6,48 @@ Version: 1.0
 Author: Mariana Kaori
 */
 
-//Desativar a action welcome_panel
-add_action('admin_init', 'hideWelcomePanel');
-
-function hideWelcomePanel()
+class SegundoPlugin
 {
-		remove_action('welcome_panel', 'wp_welcome_panel');
-}
+    private static $instance;
 
-add_action('welcome_panel', 'myWelcomePanel');
+    public static function getInstance()
+    {
+        if (self::$instance == null) {
+            self::$instance = new self();
+        }
+    }
 
-function myWelcomePanel()
-{
-    ?>
-        <div class="welcome-panel-content">
-            <h1>Seja bem-vindo ao painel administrativo</h1>
-            <p>Siga-nos nas redes sociais</p>
-            <div id="icons">
-                <a href="#" target="_blank">
-                    <img src="http://localhost/wordpress/wp-content/uploads/2023/04/012-1474968150_facebook_circle_color.png">
-                </a>
-                <a href="#" target="_blank">
-                    <img src="http://localhost/wordpress/wp-content/uploads/2023/04/012-1474968161_youtube_circle_color.png">
-                </a>
+    private function __construct()
+    {
+        //Desativar a action welcome_panel
+        add_action('admin_init', 'hideWelcomePanel');
+
+        function hideWelcomePanel()
+        {
+            remove_action('welcome_panel', 'wp_welcome_panel');
+        }
+
+        add_action('welcome_panel', array($this, 'welcomePanel'));
+    }
+
+    public function welcomePanel()
+    {
+        ?>
+            <div class="welcome-panel-content">
+                <h1>Seja bem-vindo ao painel administrativo</h1>
+                <p>Siga-nos nas redes sociais</p>
+                <div id="icons">
+                    <a href="#" target="_blank">
+                        <img src="http://localhost/wordpress/wp-content/uploads/2023/04/012-1474968150_facebook_circle_color.png">
+                    </a>
+                    <a href="#" target="_blank">
+                        <img src="http://localhost/wordpress/wp-content/uploads/2023/04/012-1474968161_youtube_circle_color.png">
+                    </a>
+                </div>
             </div>
-        </div>
-    <?php
+        <?php
+    }
+
 }
+
+SegundoPlugin::getInstance();
