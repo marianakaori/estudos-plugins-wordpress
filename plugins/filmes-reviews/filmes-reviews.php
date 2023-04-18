@@ -7,13 +7,16 @@ Version: 1.0
 Author: Mariana Kaori
 */
 
+use MetaBox\Support\Arr;
+
 use function PHPSTORM_META\map;
 
-require dirname(__FILE__).'/lib/class-tgm-plugin-activation.php';
+require_once dirname(__FILE__).'/lib/class-tgm-plugin-activation.php';
 
 class FilmesReviews
 {
     private static $instance;
+    const FIELD_PREFIX = 'fr_';
     
     public static function getInstance()
     {
@@ -27,7 +30,9 @@ class FilmesReviews
     private function __construct()
     {
         add_action('init', 'FilmesReviews::registerPostType');
+        add_action('init', 'FilmesReviews::registerTaxonomies');
         add_action('tgmpa_register', array($this, 'checkRequiredPlugins'));
+        add_filter('rwmb_meta_boxes', array($this, 'metaboxCustomFields'));
     }
 
     public static function registerPostType()
@@ -47,6 +52,19 @@ class FilmesReviews
         ));
     }
 
+    public static function registerTaxonomies()
+    {
+        register_taxonomy('generos-filme', array('filmes_reviews'), array(
+            'labels' => array(
+                'name' => __('Gêneros de filme'),
+                'singular_name' => __('Gênero de filme')
+            ),
+            'public' => true,
+            'hierarchical' => true,
+            'rewrite' => array('slug' => 'generos-filme')
+        ));
+    }
+
     /* Checar plugins requeridos */
     public static function checkRequiredPlugins()
     {
@@ -61,43 +79,106 @@ class FilmesReviews
         );
         /*Config*/
         $config  = array(
-        'domain'           => 'filmes-reviews',
-        'default_path'     => '',
-        'parent_slug'      => 'plugins.php',
-        'capability'       => 'update_plugins',
-        'menu'             => 'install-required-plugins',
-        'has_notices'      => true,
-        'is_automatic'     => false,
-        'message'          => '',
-        'strings'          => array(
-            'page_title'                      => __('Instalar plugins requeridos', 'filmes-reviews'),
-            'menu_title'                      => __('Instalar Plugins', 'filmes-reviews'),
-            'installing'                      => __('Instalando Plugin: %s', 'filmes-reviews'),
-            'oops'                            => __('Algo deu errado com a API do plug-in.', 'filmes-reviews'),
-            'notice_can_install_required'     => _n_noop('O plugin Filmes Reviews depende do seguinte plugin: %1$s.', 'Os Comentários do plugin Filmes Reviews depende dos seguintes plugins:%1$s.'),
-            'notice_can_install_recommended'  => _n_noop('O plugin Filmes review recomenda o seguinte plugin: %1$s.', 'O plugin Filmes review recomenda os seguintes plugins: %1$s.'),
-            'notice_cannot_install'           => _n_noop('Sorry, but you do not have the correct permissions to install the %s plugin. Contact the administrator of this site for help on getting the plugin installed.', 'Sorry, but you do not have the correct permissions to install the %s plugins. Contact the administrator of this site for help on getting the plugins installed.'),
-            'notice_can_activate_required'    => _n_noop('The following required plugin is currently inactive: %1$s.', 'The following required plugins are currently inactive: %1$s.'),
-            'notice_can_activate_recommended' => _n_noop('The following recommended plugin is currently inactive: %1$s.', 'The following recommended plugins are currently inactive: %1$s.'),
-            'notice_cannot_activate'          => _n_noop('Sorry, but you do not have the correct permissions to activate the %s plugin. Contact the administrator of this site for help on getting the plugin activated.', 'Sorry, but you do not have the correct permissions to activate the %s plugins. Contact the administrator of this site for help on getting the plugins activated.'),
-            'notice_ask_to_update'            => _n_noop('The following plugin needs to be updated to its latest version to ensure maximum compatibility with this theme: %1$s.', 'The following plugins need to be updated to their latest version to ensure maximum compatibility with this theme: %1$s.'),
-            'notice_cannot_update'            => _n_noop('Sorry, but you do not have the correct permissions to update the %s plugin. Contact the administrator of this site for help on getting the plugin updated.', 'Sorry, but you do not have the correct permissions to update the %s plugins. Contact the administrator of this site for help on getting the plugins updated.'),
-            'install_link'                    => _n_noop('Comece a instalação de plug-in', 'Comece a instalação dos plugins'),
-            'activate_link'                   => _n_noop('Ativar o plugin instalado', 'Ativar os plugins instalados'),
-            'return'                          => __('Voltar para os plugins requeridos instalados', 'filmes-reviews'),
-            'plugin_activated'                => __('Plugin ativado com sucesso.', 'filmes-reviews'),
-            'complete'                        => __('Todos os plugins instalados e ativados com sucesso. %s', 'filmes-reviews'),
-            'nag_type'                        => 'updated',
-            )
-        );
+            'domain'           => 'filmes-reviews',
+            'default_path'     => '',
+            'parent_slug'      => 'plugins.php',
+            'capability'       => 'update_plugins',
+            'menu'             => 'install-required-plugins',
+            'has_notices'      => true,
+            'is_automatic'     => false,
+            'message'          => '',
+            'strings'          => array(
+                'page_title'                      => __('Instalar plugins requeridos', 'filmes-reviews'),
+                'menu_title'                      => __('Instalar Plugins', 'filmes-reviews'),
+                'installing'                      => __('Instalando Plugin: %s', 'filmes-reviews'),
+                'oops'                            => __('Algo deu errado com a API do plug-in.', 'filmes-reviews'),
+                'notice_can_install_required'     => _n_noop('O plugin Filmes Reviews depende do seguinte plugin: %1$s.', 'O plugin Filmes Reviews depende dos seguintes plugins:%1$s.'),
+                'notice_can_install_recommended'  => _n_noop('O plugin Filmes review recomenda o seguinte plugin: %1$s.', 'O plugin Filmes review recomenda os seguintes plugins: %1$s.'),
+                'notice_cannot_install'           => _n_noop('Desculpe, mas você não tem as permissões corretas para instalar o plugin %s. Entre em contato com o administrador deste site para obter ajuda sobre como instalá-lo', 'Desculpe, mas você não tem as permissões corretas para instalar os plugins %s. Entre em contato com o administrador deste site para obter ajuda sobre como instalá-los.'),
+                'notice_can_activate_required'    => _n_noop('O seguinte plugin necessário está inativo: %1$s.', 'Os seguintes plugins necessários estão inativos: %1$s.'),
+                'notice_can_activate_recommended' => _n_noop('O seguinte plugin recomendado está inativo: %1$s.', 'Os seguintes plugins recomendados estão inativos: %1$s.'),
+                'notice_cannot_activate'          => _n_noop('Desculpe, mas você não tem as permissões corretas para ativar o plugin %s. Entre em contato com o administrador deste site para obter ajuda sobre como ativá-lo.', 'Desculpe, mas você não tem as permissões corretas para ativar os plugins %s. Entre em contato com o administrador deste site para obter ajuda sobre como ativá-los.'),
+                'notice_ask_to_update'            => _n_noop('O plugin a seguir precisa ser atualizado para sua versão mais recente para garantir a compatibilidade máxima com este tema: %1$s.', 'Os plugins a seguir precisam ser atualizados para sua versão mais recente para garantir a compatibilidade máxima com este tema: %1$s.'),
+                'notice_cannot_update'            => _n_noop('Desculpe, mas você não tem as permissões corretas para atualizar o plugin %s. Entre em contato com o administrador deste site para obter ajuda sobre como atualizá-lo.', 'Desculpe, mas você não tem as permissões corretas para atualizar os plugins %s. Entre em contato com o administrador deste site para obter ajuda sobre como atualizá-los.'),
+                'install_link'                    => _n_noop('Comece a instalação de plugin', 'Comece a instalação dos plugins'),
+                'activate_link'                   => _n_noop('Ativar o plugin instalado', 'Ativar os plugins instalados'),
+                'return'                          => __('Voltar para os plugins requeridos instalados', 'filmes-reviews'),
+                'plugin_activated'                => __('Plugin ativado com sucesso.', 'filmes-reviews'),
+                'complete'                        => __('Todos os plugins instalados e ativados com sucesso. %s', 'filmes-reviews'),
+                'nag_type'                        => 'updated',
+                )
+            );
         tgmpa($plugins, $config);
         /*Fim Config*/
+    }
+
+    /* METABOX */
+    public static function metaboxCustomFields()
+    {
+        $metaBoxes[] = array(
+            'id' => 'data_filme',
+            'title' => __('Informações Adicionais', 'filmes-reviews'),
+            'pages' => array('filmes_reviews', 'post'),
+            'context' => 'normal',
+            'priority' => 'high',
+            'fields' => array(
+                array(
+                    'name' => __('Ano de lançamento', 'filmes-reviews'),
+                    'desc' => __('Ano que o filme foi lançado', 'filmes-reviews'),
+                    'id' => self::FIELD_PREFIX.'filme_ano',
+                    'type' => 'number',
+                    'std' => date('Y'),
+                    'min' => '1880'
+                ),
+                array(
+                    'name' => __('Diretor', 'filmes-reviews'),
+                    'desc' => __('Quem dirigiu o filme', 'filmes-reviews'),
+                    'type' => 'text',
+                    'std' => ''
+                ),
+                array(
+                    'name' => 'Site',
+                    'desc' => 'Link do site do filme',
+                    'id' => self::FIELD_PREFIX.'filme_site',
+                    'type' => 'url',
+                    'std' => ''
+                )
+            )
+        );
+
+        $metaBoxes[] = array(
+            'id' => 'avaliacao_data',
+            'title' => __('Avaliação do Filme', 'filmes-reviews'),
+            'pages' => array('filmes_reviews'),
+            'context' => 'side',
+            'priority' => 'high',
+            'fields' => array(
+                array(
+                    'name' => __('Avaliação', 'filmes-reviews'),
+                    'desc' => __('Em uma escala de 1 a 5 (5 é a melhor nota)', 'filmes-reviews'),
+                    'id' => self::FIELD_PREFIX.'filme_nota',
+                    'type' => 'select',
+                    'options' => array(
+                        '' => __('Avalie aqui', 'filmes-reviews'),
+                        1 => __('1 - Não gostei', 'filmes-reviews'),
+                        2 => __('2 - Gostei pouco', 'filmes-reviews'),
+                        3 => __('3 - Gostei mais ou menos', 'filmes-reviews'),
+                        4 => __('4 - Gostei', 'filmes-reviews'),
+                        5 => __('5 - Gostei muito', 'filmes-reviews'),
+                    ),
+                    'std' => ''
+                )
+            )
+        );
+
+        return $metaBoxes;
     }
 
 
     public static function activate()
     {
         self::registerPostType();
+        self::registerTaxonomies();
         flush_rewrite_rules();
     }
 }
