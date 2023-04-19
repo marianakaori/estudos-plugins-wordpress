@@ -9,8 +9,6 @@ Author: Mariana Kaori
 
 use MetaBox\Support\Arr;
 
-use function PHPSTORM_META\map;
-
 require_once dirname(__FILE__).'/lib/class-tgm-plugin-activation.php';
 
 class FilmesReviews
@@ -33,6 +31,10 @@ class FilmesReviews
         add_action('init', 'FilmesReviews::registerTaxonomies');
         add_action('tgmpa_register', array($this, 'checkRequiredPlugins'));
         add_filter('rwmb_meta_boxes', array($this, 'metaboxCustomFields'));
+
+        /* TEMPLATE CUSTOMIZADO */
+        add_action('template_include', array($this, 'addCPTTemplate'));
+        add_action('wp_enqueue_scripts', array($this, 'addStyleScripts'));
     }
 
     public static function registerPostType()
@@ -54,19 +56,19 @@ class FilmesReviews
 
     public static function registerTaxonomies()
     {
-        register_taxonomy('generos-filme', array('filmes_reviews'), array(
+        register_taxonomy('generos_filme', array('filmes_reviews'), array(
             'labels' => array(
                 'name' => __('Gêneros de filme'),
                 'singular_name' => __('Gênero de filme')
             ),
             'public' => true,
             'hierarchical' => true,
-            'rewrite' => array('slug' => 'generos-filme')
+            'rewrite' => array('slug' => 'generos_filme')
         ));
     }
 
     /* Checar plugins requeridos */
-    public static function checkRequiredPlugins()
+    public function checkRequiredPlugins()
     {
         $plugins = array(
             array(
@@ -113,7 +115,7 @@ class FilmesReviews
     }
 
     /* METABOX */
-    public static function metaboxCustomFields()
+    public function metaboxCustomFields()
     {
         $metaBoxes[] = array(
             'id' => 'data_filme',
@@ -133,6 +135,7 @@ class FilmesReviews
                 array(
                     'name' => __('Diretor', 'filmes-reviews'),
                     'desc' => __('Quem dirigiu o filme', 'filmes-reviews'),
+                    'id' => self::FIELD_PREFIX.'filme_diretor',
                     'type' => 'text',
                     'std' => ''
                 ),
@@ -165,6 +168,11 @@ class FilmesReviews
                         3 => __('3 - Gostei mais ou menos', 'filmes-reviews'),
                         4 => __('4 - Gostei', 'filmes-reviews'),
                         5 => __('5 - Gostei muito', 'filmes-reviews'),
+                        6 => __('6 - Fantástico!', 'filmes-reviews'),
+                        7 => __('7 - Clássico inesquecível', 'filmes-reviews'),
+                        8 => __('8 - Magnífico', 'filmes-reviews'),
+                        9 => __('9 - Obra-prima', 'filmes-reviews'),
+                        10 => __('10 - Perfeito', 'filmes-reviews')
                     ),
                     'std' => ''
                 )
@@ -174,6 +182,21 @@ class FilmesReviews
         return $metaBoxes;
     }
 
+    public function addCPTTemplate($template)
+    {
+        if (is_singular('filmes_reviews')) {
+            if (file_exists(get_stylesheet_directory().'single-filme-review.php')) {
+                return get_stylesheet_directory().'single-filme-review.php';
+            }
+            return plugin_dir_path(__FILE__).'single-filme-review.php';
+        }
+        return $template;
+    }
+
+    public function addStyleScripts()
+    {
+        wp_enqueue_style('filme-review-style', plugin_dir_url(__FILE__). 'filme-review.css');
+    }
 
     public static function activate()
     {
