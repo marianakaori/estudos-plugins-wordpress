@@ -195,7 +195,7 @@ class FilmesReviews
 
     public function addStyleScripts()
     {
-        wp_enqueue_style('filme-review-style', plugin_dir_url(__FILE__). 'filme-review.css');
+        wp_enqueue_style('filme-review-style', plugin_dir_url(__FILE__).'filme-review.css');
     }
 
     public static function activate()

@@ -32,9 +32,8 @@ get_header();
                         <header class="entry-header">
                             <?php the_title('<h1 class="entry-title">', '</h1>') ?>
                         </header>
-                    </article>
-                    <div class="entry-content">
-                        <div class="left">
+                        <div class="entry-content">
+                            <div class="left">
                             <?php
                                 if (isset($imagem)):
                                     if (isset($site)):
@@ -51,23 +50,71 @@ get_header();
                                     </div>
                                     <?php
                                 endif;
-                            ?>
+                                ?>
                             <div class="filme-meta">
                                 <?php if (!empty($diretor)): ?>
                                     <label>Dirigido por: </label><?php echo $diretor; ?>
                                 <?php endif; ?>
 
-                                <div class="genero">
-                                    <label>Gênero: </label>
-                                    <?php
-                                        foreach ($filmeTipo as $t):
-                                            echo $t . '';
-                                        endforeach;
-                                    ?>
+                                <?php if (!empty($genero)): ?>
+                                    <div class="genero">
+                                        <label>Gênero: </label>
+                                        <?php
+                                            foreach ($filmeTipo as $t):
+                                                echo $t . '';
+                                            endforeach;
+                                            ?>
+                                    </div>
+                                    <?php endif; ?>
+                                    <?php if (!empty($ano)): ?>
+                                    <div class="ano">
+                                        <label>Lançamento: </label>
+                                        <?php
+                                            echo $ano;
+                                            ?>
+                                    </div>
+                                <?php endif; ?>
+                                <?php if (!empty($site)): ?>
+                                    <div class="site">
+                                        <label>Site: </label>
+                                        <?php echo '<a href="' . $site . '" target="__blank"> site do filme </a>'?>
+                                    </div>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                            <div class="right">
+                                <div class="review-body">
+                                    <?php the_content() ?>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                        <?php
+                            edit_post_link(
+                                __('Editar'),
+                                '<footer class="entry-footer"> <span class="edit-link">',
+                                '</span> </footer>'
+                            );
+                        ?>
+                    </article>
+                    <?php
+                        /* comentários */
+                        if (comments_open() || get_comments_number()):
+                            comments_template();
+                        endif;
+
+                        /* navegação */
+                        the_post_navigation(
+                            array(
+                                'next_text' =>  '<span class="meta-nav" aria-hidden="true">' .__('Próximo').'</span>'.
+                                                '<span class="screen-reader-text">' .__('Próximo Review').'</span>'.
+                                                '<span class="post-title"> %title </span>',
+
+                                'prev-text' =>  '<span class="meta-nav" aria-hidden="true">' .__('Anterior').'</span>'.
+                                                '<span class="screen-reader-text">' .__('Review Anterior').'</span>'.
+                                                '<span class="post-title"> %title </span>'
+                            )
+                        )
+                    ?>
                 <?php
             endwhile;
         ?>
