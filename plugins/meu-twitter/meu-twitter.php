@@ -7,6 +7,7 @@ Author: Mariana Kaori
 Text Domain: meu-twitter
 */
 
+if (!defined('ABSPATH')) { header('Location:http://localhost/wordpress'); }
 class MeuTwitter
 {
     private static $instance;
