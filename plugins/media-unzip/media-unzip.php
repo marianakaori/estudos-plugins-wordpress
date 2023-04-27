@@ -32,14 +32,14 @@ class MediaUnzip
             'Upload Media Zip',
             'Upload Media Zip',
             'manage_options',
-            'upload-media-zip',
+            'upload_media_zips',
             'MediaUnzip::uploadMediaZips',
             'dashicons-media-archive',
             10
         );
     }
 
-    public function allowedFileTypes($filetype)
+    public static function allowedFileTypes($filetype)
     {
         $allowedFileTypes = array('image/png', 'image/jpeg', 'image/jpg', 'image/gif');
 
@@ -48,11 +48,11 @@ class MediaUnzip
 
     public static function uploadMediaZips()
     {
-        echo '<h3>' . __('Upload de arquivos zip', 'media-unzip') . '</h3>';
+        _e('<h3> Upload de arquivos zip </h3>', 'media-unzip');
 
-        if (isset($_FILES['fileToUpload'])){
-            //obter diretoriode upload atual
-            $dir = "../wp-content/upload" . wp_upload_dir()['subdir'];
+        if (isset($_FILES['fileToUpload'])) {
+            //obter diretorio de upload atual
+            $dir = "../wp-content/uploads" . wp_upload_dir()['subdir'];
 
             //carregar o arquivo
             $targetFile = $dir . '/' . basename($_FILES['fileToUpload']['name']);
@@ -63,21 +63,62 @@ class MediaUnzip
             $zip = new ZipArchive();
 
             //abrir o arquivo zip
-            $res = $zip-> open($targetFile);
+            $res = $zip->open($targetFile);
             if ($res) {
                 $zip->extractTo($dir);
                 echo
                     '<h3 style="color:#090;">
-                        O arquivo zip $fileName foi descompactado com sucesso!
-                    </h3>' . wp_upload_dir()['url'];
+                        O arquivo zip '.$fileName.' foi descompactado com sucesso! ' .wp_upload_dir()['url'].
+                    '</h3>' ;
+
+                echo "Tem " . $zip->numFiles . " arquivos neste arquivo zip. <br>";
+                for ($i=0; $i < $zip->numFiles; $i++) {
+                    //obter url do arquivo de mídia
+                    $mediaFileName = wp_upload_dir()['url'].'/'.$zip->getNameIndex($i);
+
+                    //obter o tipo do arquivo de mídia
+                    $filetype =wp_check_filetype(basename($mediaFileName), null);
+                    $allowed = MediaUnzip::allowedFileTypes($filetype['type']);
+
+                    if ($allowed) {
+                        //exibir um link para ver o arquivo upload
+                        echo
+                            '<a href="' .$mediaFileName. '"target="_blank">' .$mediaFileName. '</a>
+                            Tipo: ' . $filetype['type'] . '<br>';
+
+                        //informações dos anexos que serão utilizadas pela biblioteca de mídia
+                        $attachment = array(
+                            'guid' => $mediaFileName,
+                            'post_mime_type' => $filetype['type'],
+                            'post_title' => preg_replace('/\.[^.]+$/', '', $zip->getNameIndex($i)),
+                            'post_content' => '',
+                            'post_status' => 'inherit'
+                        );
+
+                        $attachId = wp_insert_attachment($attachment, $dir .'/'. $zip->getNameIndex($i));
+
+                        //metadados para o anexo
+                        $attachData = wp_generate_attachment_metadata($attachId, $dir .'/'. $zip->getNameIndex($i));
+                        wp_update_attachment_metadata($attachId, $attachData);
+                    } else {
+                        echo
+                            $zip->getNameIndex($i) .'não pôde ser enviado, o tipo'.
+                            $filetype['type'] . 'não é permitido. <br>';
+                    }
+                }
+            } else {
+                echo '<h3 style="color:#F00;"> O arquivo zip NÃO foi descompactado com sucesso</h3>';
             }
+
+            $zip->close();
         }
 
         echo
             '<form
                 style="margin-top: 20px;"
-                action="/wordpress/wp-admin/admin.php?page=uploadMediaZips"
+                action="/wordpress/wp-admin/admin.php?page=upload_media_zips"
                 enctype="multipart/form-data"
+                method="post"
             >
                 Selecione o arquivo zip
                 <input type="file" name="fileToUpload" id="fileToUpload">
