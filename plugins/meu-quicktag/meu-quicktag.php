@@ -23,13 +23,12 @@ class MeuQuicktag
 
     private function __construct()
     {
-        add_action('admin_print_footer_scripts', array($this, 'myQuicktag'));
+        add_action('admin_print_footer_scripts', array($this, 'myQuicktag'), 11);
     }
 
     public function myQuicktag()
     {
-        if (wp_script_is('quicktag')) {
-            echo "AAAAAAAAAAAAA"
+        if (wp_script_is('quicktags')) {
             ?>
             <script type="text/javascript">
                 //função para recuperar texto selecionado
@@ -42,7 +41,7 @@ class MeuQuicktag
 
                 QTags.addButton('btnPersonalizado', 'Twitter', getT);
                 function getT() {
-                    var selectedText = getSel();
+                    var selected_text = getSel();
                     QTags.insertContent('[twitter]')
                 }
             </script>
