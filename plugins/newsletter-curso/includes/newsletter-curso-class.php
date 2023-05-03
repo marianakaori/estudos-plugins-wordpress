@@ -37,7 +37,7 @@ public function widget($args, $instance)
         <form
             id="subscriber-form"
             method="post"
-            action="'.plugins_url().'/newsletter-curso/inlcudes/newsletter-curso-mailer.php"
+            action="'.plugins_url().'/newsletter-curso/includes/newsletter-curso-mailer.php"
         >
             <div class="form-group">
                 <label for="name">
@@ -45,7 +45,19 @@ public function widget($args, $instance)
                 </label>
                 <input type="text" id="name" name="name" class="form-control" required>
             </div>
+            <div class="form-group">
+                <label for="email">
+                    Email:
+                </label>
+                <input type="text" id="email" name="email" class="form-control" required>
+            </div>
+            <br>
+
+            <input type="hidden" name="recipient" value="'.$instance['recipient'].'">
+            <input type="hidden" name="subject" value="'.$instance['subject'].'">
+            <input type="submit" class="btn btn-primary" name="subscriber_submit" value="Inscreva-se">
         </form>
+        <br>
     ';
 }
 
