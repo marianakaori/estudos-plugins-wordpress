@@ -22,7 +22,31 @@ public function __construct()
  */
 public function widget($args, $instance)
 {
-    // outputs the content of the widget
+    echo $args['before_widget'];
+    echo $args['before_title'];
+
+    if (!empty($instance['title'])) {
+        echo $instance['title'];
+    }
+
+    echo $args['after_title'];
+    echo '
+        <div id="form-msg">
+
+        </div>
+        <form
+            id="subscriber-form"
+            method="post"
+            action="'.plugins_url().'/newsletter-curso/inlcudes/newsletter-curso-mailer.php"
+        >
+            <div class="form-group">
+                <label for="name">
+                    Nome:
+                </label>
+                <input type="text" id="name" name="name" class="form-control" required>
+            </div>
+        </form>
+    ';
 }
 
 /**
@@ -78,7 +102,6 @@ public function form($instance)
  */
 public function update($newInstance, $oldInstance)
 {
-    // processes widget options to be saved
     return array(
         'title' =>(!empty($newInstance['title'])) ? strip_tags($newInstance['title']) : '',
         'recipient' =>(!empty($newInstance['recipient'])) ? strip_tags($newInstance['recipient']) : '',
