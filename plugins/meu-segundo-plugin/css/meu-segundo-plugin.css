@@ -1,0 +1,18 @@
+#welcome-panel{
+    background-color: white;
+    background-image: url(seal.png);
+    background-repeat: no-repeat;
+    background-position: 450px 6px;
+
+    padding: 12px;
+    
+    display: flex;
+    justify-content: flex-start;
+    flex-direction: column;
+}
+
+.welcome-panel-content{
+    min-height: 0px;
+    display: flex;
+    flex-direction: column;
+}
